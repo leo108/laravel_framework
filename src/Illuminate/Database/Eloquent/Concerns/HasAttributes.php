@@ -50,6 +50,13 @@ trait HasAttributes
     protected $dateFormat;
 
     /**
+     * The storage format of the model's specific date columns.
+     *
+     * @var array
+     */
+    protected $datetimeFormats = [];
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array
@@ -119,7 +126,7 @@ trait HasAttributes
             }
 
             $attributes[$key] = $this->serializeDate(
-                $this->asDateTime($attributes[$key])
+                $this->asDateTime($attributes[$key]), $key
             );
         }
 
@@ -180,7 +187,7 @@ trait HasAttributes
             // into an array without affecting how they are persisted into the storage.
             if ($attributes[$key] &&
                 ($value === 'date' || $value === 'datetime')) {
-                $attributes[$key] = $this->serializeDate($attributes[$key]);
+                $attributes[$key] = $this->serializeDate($attributes[$key], $key);
             }
         }
 
@@ -749,11 +756,15 @@ trait HasAttributes
      * Prepare a date for array / JSON serialization.
      *
      * @param  \DateTimeInterface  $date
+     * @param  string  $field
      * @return string
      */
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date, $field = null)
     {
-        return $date->format($this->getDateFormat());
+        $default = $this->getDateFormat();
+        $format  = !is_null($field) ? array_get($this->datetimeFormats, $field, $default) : $default;
+
+        return $date->format($format);
     }
 
     /**

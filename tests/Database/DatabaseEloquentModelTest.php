@@ -399,6 +399,15 @@ class DatabaseEloquentModelTest extends TestCase
         $value = '1429311541';
         $this->assertEquals('2015-04-17 22:59:01', $model->fromDateTime($value));
     }
+    
+    public function testCustomDateTimeFormat() {
+        $model = new EloquentCustomDateFormatModelStub();
+        $model->date_field = \Carbon\Carbon::parse('2015-04-17');
+        $model->datetime_field = \Carbon\Carbon::parse('2015-04-17 22:59:01');
+        $array = $model->toArray();
+        $this->assertEquals($array['date_field'], '2015-04-17');
+        $this->assertEquals($array['datetime_field'], 'April 17, 2015 22:59');
+    }
 
     public function testInsertProcess()
     {
@@ -1739,6 +1748,22 @@ class EloquentDateModelStub extends EloquentModelStub
     {
         return ['created_at', 'updated_at'];
     }
+}
+
+class EloquentCustomDateFormatModelStub extends Model
+{
+    protected $datetimeFormats = [
+        'date_field'     => 'Y-m-d',
+        'datetime_field' => 'F j, Y H:i',
+    ];
+
+    protected $casts = [
+        'date_field' => 'datetime',
+    ];
+
+    protected $dates = [
+        'datetime_field',
+    ];
 }
 
 class EloquentModelSaveStub extends Model
