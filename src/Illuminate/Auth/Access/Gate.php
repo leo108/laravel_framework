@@ -4,6 +4,7 @@ namespace Illuminate\Auth\Access;
 
 use Closure;
 use Exception;
+use Illuminate\Auth\Access\Events\GateEvaluated;
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -88,7 +89,7 @@ class Gate implements GateContract
      */
     public function __construct(Container $container, callable $userResolver, array $abilities = [],
                                 array $policies = [], array $beforeCallbacks = [], array $afterCallbacks = [],
-                                callable $guessPolicyNamesUsingCallback = null)
+                                ?callable $guessPolicyNamesUsingCallback = null)
     {
         $this->policies = $policies;
         $this->container = $container;
@@ -212,7 +213,7 @@ class Gate implements GateContract
      * @param  array|null  $abilities
      * @return $this
      */
-    public function resource($name, $class, array $abilities = null)
+    public function resource($name, $class, ?array $abilities = null)
     {
         $abilities = $abilities ?: [
             'viewAny' => 'viewAny',
@@ -592,7 +593,7 @@ class Gate implements GateContract
     {
         if ($this->container->bound(Dispatcher::class)) {
             $this->container->make(Dispatcher::class)->dispatch(
-                new Events\GateEvaluated($user, $ability, $result, $arguments)
+                new GateEvaluated($user, $ability, $result, $arguments)
             );
         }
     }

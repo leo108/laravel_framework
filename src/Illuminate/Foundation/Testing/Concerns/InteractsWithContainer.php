@@ -5,6 +5,7 @@ namespace Illuminate\Foundation\Testing\Concerns;
 use Closure;
 use Illuminate\Foundation\Mix;
 use Illuminate\Foundation\Vite;
+use Illuminate\Support\HtmlString;
 use Mockery;
 
 trait InteractsWithContainer
@@ -56,7 +57,7 @@ trait InteractsWithContainer
      * @param  \Closure|null  $mock
      * @return \Mockery\MockInterface
      */
-    protected function mock($abstract, Closure $mock = null)
+    protected function mock($abstract, ?Closure $mock = null)
     {
         return $this->instance($abstract, Mockery::mock(...array_filter(func_get_args())));
     }
@@ -68,7 +69,7 @@ trait InteractsWithContainer
      * @param  \Closure|null  $mock
      * @return \Mockery\MockInterface
      */
-    protected function partialMock($abstract, Closure $mock = null)
+    protected function partialMock($abstract, ?Closure $mock = null)
     {
         return $this->instance($abstract, Mockery::mock(...array_filter(func_get_args()))->makePartial());
     }
@@ -80,7 +81,7 @@ trait InteractsWithContainer
      * @param  \Closure|null  $mock
      * @return \Mockery\MockInterface
      */
-    protected function spy($abstract, Closure $mock = null)
+    protected function spy($abstract, ?Closure $mock = null)
     {
         return $this->instance($abstract, Mockery::spy(...array_filter(func_get_args())));
     }
@@ -109,8 +110,57 @@ trait InteractsWithContainer
             $this->originalVite = app(Vite::class);
         }
 
-        $this->swap(Vite::class, function () {
-            return '';
+        $this->swap(Vite::class, new class
+        {
+            public function __invoke()
+            {
+                return '';
+            }
+
+            public function __call($name, $arguments)
+            {
+                return '';
+            }
+
+            public function __toString()
+            {
+                return '';
+            }
+
+            public function useIntegrityKey()
+            {
+                return $this;
+            }
+
+            public function useBuildDirectory()
+            {
+                return $this;
+            }
+
+            public function useHotFile()
+            {
+                return $this;
+            }
+
+            public function withEntryPoints()
+            {
+                return $this;
+            }
+
+            public function useScriptTagAttributes()
+            {
+                return $this;
+            }
+
+            public function useStyleTagAttributes()
+            {
+                return $this;
+            }
+
+            public function preloadedAssets()
+            {
+                return [];
+            }
         });
 
         return $this;
@@ -142,7 +192,7 @@ trait InteractsWithContainer
         }
 
         $this->swap(Mix::class, function () {
-            return '';
+            return new HtmlString('');
         });
 
         return $this;

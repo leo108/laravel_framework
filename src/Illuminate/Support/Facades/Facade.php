@@ -299,6 +299,7 @@ abstract class Facade
             'URL' => URL::class,
             'Validator' => Validator::class,
             'View' => View::class,
+            'Vite' => Vite::class,
         ]);
     }
 

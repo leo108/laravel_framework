@@ -302,7 +302,7 @@ class NotificationFake implements NotificationDispatcher, NotificationFactory
      * @param  array|null  $channels
      * @return void
      */
-    public function sendNow($notifiables, $notification, array $channels = null)
+    public function sendNow($notifiables, $notification, ?array $channels = null)
     {
         if (! $notifiables instanceof Collection && ! is_array($notifiables)) {
             $notifiables = [$notifiables];
@@ -361,5 +361,15 @@ class NotificationFake implements NotificationDispatcher, NotificationFactory
         $this->locale = $locale;
 
         return $this;
+    }
+
+    /**
+     * Get the notifications that have been sent.
+     *
+     * @return array
+     */
+    public function sentNotifications()
+    {
+        return $this->notifications;
     }
 }

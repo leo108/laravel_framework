@@ -200,6 +200,29 @@ class ValidationExistsRuleTest extends TestCase
         $this->assertTrue($v->passes());
     }
 
+    public function testItChoosesValidRecordsUsingWhereNotRule()
+    {
+        $rule = new Exists('users', 'id');
+
+        $rule->whereNot('type', 'baz');
+
+        User::create(['id' => '1', 'type' => 'foo']);
+        User::create(['id' => '2', 'type' => 'bar']);
+        User::create(['id' => '3', 'type' => 'baz']);
+        User::create(['id' => '4', 'type' => 'other']);
+        User::create(['id' => '5', 'type' => 'baz']);
+
+        $trans = $this->getIlluminateArrayTranslator();
+        $v = new Validator($trans, [], ['id' => $rule]);
+        $v->setPresenceVerifier(new DatabasePresenceVerifier(Eloquent::getConnectionResolver()));
+
+        $v->setData(['id' => 3]);
+        $this->assertFalse($v->passes());
+
+        $v->setData(['id' => 4]);
+        $this->assertTrue($v->passes());
+    }
+
     public function testItIgnoresSoftDeletes()
     {
         $rule = new Exists('table');
@@ -209,6 +232,17 @@ class ValidationExistsRuleTest extends TestCase
         $rule = new Exists('table');
         $rule->withoutTrashed('softdeleted_at');
         $this->assertSame('exists:table,NULL,softdeleted_at,"NULL"', (string) $rule);
+    }
+
+    public function testItOnlyTrashedSoftDeletes()
+    {
+        $rule = new Exists('table');
+        $rule->onlyTrashed();
+        $this->assertSame('exists:table,NULL,deleted_at,"NOT_NULL"', (string) $rule);
+
+        $rule = new Exists('table');
+        $rule->onlyTrashed('softdeleted_at');
+        $this->assertSame('exists:table,NULL,softdeleted_at,"NOT_NULL"', (string) $rule);
     }
 
     protected function createSchema()
